@@ -1,6 +1,8 @@
 package academyGroup.Entities;
 
-public class Course {
+import java.io.Serializable;
+
+public class Course  implements Serializable {
     private int id;
     private String name;
     private int academyId;

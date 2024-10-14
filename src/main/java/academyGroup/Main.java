@@ -1,20 +1,20 @@
 package academyGroup;
 
-import academyGroup.Entities.AcademyGroup;
-import academyGroup.Repository.AcademyGroupFileRepository;
+import academyGroup.Entities.Academy;
+import academyGroup.Repository.AcademyRepository;
+import academyGroup.Repository.DbContext;
 import academyGroup.Repository.IRepository;
 
 public class Main {
-    public static void main(String[] args) {
-        IRepository<AcademyGroup> academyGroupRepository = new AcademyGroupFileRepository("group.file");
-        academyGroupRepository.add(new AcademyGroup(0, "group2024"));
-        academyGroupRepository.add(new AcademyGroup(1, "group2025"));
+    public static void main(String[] args) throws Exception {
+        DbContext context = new DbContext("db");
+        IRepository<Academy> academyRepository = new AcademyRepository(context);
+      //  academyRepository.add(new Academy(0, "GrowthHungry Academy"));
+        for (Academy academy : academyRepository.getAll()) {
+            System.out.println(academy.getId() + " " + academy.getDescription());
 
-        academyGroupRepository.update(new AcademyGroup(0, "group deprecated"));
-        academyGroupRepository.remove(0);
-
-        for (AcademyGroup academyGroup: academyGroupRepository.getAll()) {
-            System.out.println("id= " + academyGroup.getId() + "; name= " + academyGroup.getName());
         }
+
+
     }
 }

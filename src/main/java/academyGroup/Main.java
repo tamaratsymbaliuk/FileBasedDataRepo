@@ -12,9 +12,6 @@ public class Main {
       //  academyRepository.add(new Academy(0, "GrowthHungry Academy"));
         for (Academy academy : academyRepository.getAll()) {
             System.out.println(academy.getId() + " " + academy.getDescription());
-
         }
-
-
     }
 }

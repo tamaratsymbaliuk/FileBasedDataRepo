@@ -4,6 +4,7 @@ import academyGroup.Entities.Academy;
 import academyGroup.Entities.Group;
 
 import java.util.List;
+import java.util.Map;
 
 public class AcademyRepository implements IRepository<Academy> {
     private DbContext context;
@@ -14,31 +15,24 @@ public class AcademyRepository implements IRepository<Academy> {
 
 
     @Override
-    public List<Academy> getAll() {
+    public Map<Integer, Academy> getAll() {
         DbSet dbSet = context.getDatabaseFromFile();
         return dbSet.getAcademies();
     }
 
     @Override
     public Academy getById(int id) {
-        List<Academy> academies = getAll();
-
-        for (Academy academy : academies) {
-            if (academy.getId() == id) {
-                return academy;
-            }
-        }
-        return null;
+        return getAll().get(id);  // Use Map's get method for O(1) lookup
     }
 
     @Override
     public void add(Academy academy) {
-        List<Academy> academies = getAll(); // application heap
-        academies.add(academy); // your changes affect only heap
-        saveChanges(academies); // let's update our file with data from heap
+        DbSet dbSet = context.getDatabaseFromFile();
+        dbSet.addAcademy(academy);  // Add directly using the DbSet method
+        context.SaveChangesToFile(dbSet);  // Save changes
     }
 
-    private void saveChanges(List<Academy> academies) {
+    private void saveChanges(Map<Integer, Academy> academies) {
         DbSet dbSet = context.getDatabaseFromFile();
         dbSet.setAcademies(academies);
         context.SaveChangesToFile(dbSet);
@@ -46,21 +40,15 @@ public class AcademyRepository implements IRepository<Academy> {
 
     @Override
     public void update(Academy academy) {
-        List<Academy> academies = getAll();
-
-        for (int i = 0; i < academies.size(); i++) {
-            if (academies.get(i).getId() == academy.getId()) {
-                academies.set(i, academy);
-                break;
-            }
-        }
-        saveChanges(academies);
+        DbSet dbSet = context.getDatabaseFromFile();
+        dbSet.addAcademy(academy);  // If academy already exists, overwrite it
+        context.SaveChangesToFile(dbSet);
     }
 
     @Override
     public void remove(int id) {
-        List<Academy> academies = getAll();
-        academies.removeIf(group -> group.getId() == id);
-        saveChanges(academies);
+        DbSet dbSet = context.getDatabaseFromFile();
+        dbSet.getAcademies().remove(id);  // Remove by key in the Map
+        context.SaveChangesToFile(dbSet);
     }
 }

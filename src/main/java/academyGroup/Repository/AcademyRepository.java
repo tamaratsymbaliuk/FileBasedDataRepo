@@ -1,9 +1,6 @@
 package academyGroup.Repository;
 
 import academyGroup.Entities.Academy;
-import academyGroup.Entities.Group;
-
-import java.util.List;
 import java.util.Map;
 
 public class AcademyRepository implements IRepository<Academy> {

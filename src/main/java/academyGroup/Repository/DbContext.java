@@ -1,16 +1,21 @@
 package academyGroup.Repository;
 
-import academyGroup.Entities.Group;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 // DbContext context = new DbContext();
 // DbSet database = context.getDatabaseFromFile();
 // database.setMentors(updatedMentors);
 // database.setCourse(updatedCourses);
 // context.saveChangesToFile(database);
+
+/**
+ * Handles file-based database context, managing read and write operations for DbSet.
+ * Acts as a bridge between the application and the database.
+ * It manages the lifecycle of the DbSet and keeps track of changes made to entities.
+ * It retrieves and saves DbSet instances, allowing for interaction with the collections of entities.
+ * It handles loading data from the database file and saving changes back to it.
+ * It maintains a state for tracking whether there are unsaved changes in the DbSet.
+ */
 public class DbContext {
     private final String FILENAME;
     private boolean containsNewChanges; // it should be from global resource file if many people use it
@@ -30,6 +35,9 @@ public class DbContext {
         this.containsNewChanges = containsNewChanges;
     }
 
+    /**
+     * Retrieves the database from file, loading it into memory.
+     */
     public DbSet getDatabaseFromFile() {
         if (containsNewChanges) {
             currentDbSet = new DbSet();
@@ -48,6 +56,9 @@ public class DbContext {
         return currentDbSet;
     }
 
+    /**
+     * Saves the current database state to file.
+     */
     public void SaveChangesToFile(DbSet dbSet) {
         containsNewChanges = true;
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(FILENAME))){
@@ -57,8 +68,6 @@ public class DbContext {
             e.printStackTrace();
         }
     }
-
-
 
     private void createFileIfDoesExist() {
         File file = new File(FILENAME);

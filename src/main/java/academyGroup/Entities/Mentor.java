@@ -2,6 +2,10 @@ package academyGroup.Entities;
 
 import java.io.Serializable;
 
+/**
+ * The Mentor class represents a mentor or instructor in an academy.
+ * It includes the mentor's ID, name, and the associated academy ID.
+ */
 public class Mentor implements Serializable {
     private int id;
     private String name;

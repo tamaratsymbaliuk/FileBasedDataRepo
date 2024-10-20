@@ -2,15 +2,21 @@ package academyGroup.Entities;
 
 import java.io.Serializable;
 
+/**
+ * The Course class represents a course offered by an academy.
+ * It includes the course's ID, name, associated academy ID, and price (marked as transient).
+ */
 public class Course  implements Serializable {
     private int id;
     private String name;
     private int academyId;
+    private transient double price;
 
-    public Course(int id, String name, int academyId) {
+    public Course(int id, String name, int academyId, double price) {
         this.id = id;
         this.name = name;
         this.academyId = academyId;
+        this.price = price;
     }
 
     public int getId() {
@@ -35,5 +41,13 @@ public class Course  implements Serializable {
 
     public void setAcademyId(int academyId) {
         this.academyId = academyId;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

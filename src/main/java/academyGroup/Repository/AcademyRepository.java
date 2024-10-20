@@ -3,6 +3,10 @@ package academyGroup.Repository;
 import academyGroup.Entities.Academy;
 import java.util.Map;
 
+/**
+ * The AcademyRepository class manages CRUD operations for Academy entities.
+ * It uses a DbSet to store and retrieve academy data.
+ */
 public class AcademyRepository implements IRepository<Academy> {
     private DbContext context;
 

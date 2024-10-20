@@ -1,12 +1,14 @@
 package academyGroup.Repository;
 
 import academyGroup.Entities.Course;
+import java.util.Map;
 
-import java.util.List;
-
+/**
+ * Manages CRUD operations for Academy entities using a DbSet.
+ */
 public class CourseRepository implements IRepository<Course> {
     @Override
-    public List<Course> getAll() {
+    public Map<Integer,Course> getAll() {
         return null;
     }
 
@@ -19,12 +21,10 @@ public class CourseRepository implements IRepository<Course> {
     public void add(Course entity) {
 
     }
-
     @Override
     public void update(Course entity) {
 
     }
-
     @Override
     public void remove(int id) {
 

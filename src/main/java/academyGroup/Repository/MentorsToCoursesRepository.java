@@ -1,12 +1,14 @@
 package academyGroup.Repository;
 
 import academyGroup.Entities.MentorsToCourses;
+import java.util.Map;
 
-import java.util.List;
-
+/**
+ * Repository for managing CRUD operations for MentorsToCourses entities.
+ */
 public class MentorsToCoursesRepository implements IRepository<MentorsToCourses> {
     @Override
-    public List<MentorsToCourses> getAll() {
+    public Map<Integer,MentorsToCourses> getAll() {
         return null;
     }
 
@@ -24,7 +26,6 @@ public class MentorsToCoursesRepository implements IRepository<MentorsToCourses>
     public void update(MentorsToCourses entity) {
 
     }
-
     @Override
     public void remove(int id) {
 

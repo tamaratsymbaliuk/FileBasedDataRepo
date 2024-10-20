@@ -5,11 +5,17 @@ import java.util.Map;
 
 /**
  * The AcademyRepository class manages CRUD operations for Academy entities.
- * It uses a DbSet to store and retrieve academy data.
+ * This class interacts with a DbContext, which loads and saves data to a file-based database.
  */
 public class AcademyRepository implements IRepository<Academy> {
     private DbContext context;
 
+    /**
+     * Constructor to initialize the repository with a DbContext.
+     * The DbContext is responsible for interacting with the database file.
+     *
+     * @param context The DbContext that manages file-based database operations.
+     */
     public AcademyRepository(DbContext context) {
         this.context = context;
     }

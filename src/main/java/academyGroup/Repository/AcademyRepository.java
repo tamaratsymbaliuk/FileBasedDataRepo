@@ -1,7 +1,10 @@
 package academyGroup.Repository;
 
 import academyGroup.Entities.Academy;
+
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The AcademyRepository class manages CRUD operations for Academy entities.
@@ -22,40 +25,54 @@ public class AcademyRepository implements IRepository<Academy> {
 
 
     @Override
-    public Map<Integer, Academy> getAll() {
+    public Map<String, Academy> getAll() {
         DbSet dbSet = context.getDatabaseFromFile();
-        return dbSet.getAcademies();
+        return new HashMap<String, Academy>(dbSet.getAcademies());
     }
 
     @Override
-    public Academy getById(int id) {
-        return getAll().get(id);  // Use Map's get method for O(1) lookup
+    public Academy getById(String id) {
+        Map<String, Academy> academies = getAll(); // Use Map's get method for O(1) lookup
+        if (academies.containsKey(id)) {
+            return academies.get(id);
+        }
+
+        return null;
     }
 
     @Override
-    public void add(Academy academy) {
+    public String add(Academy academy) {
         DbSet dbSet = context.getDatabaseFromFile();
-        dbSet.addAcademy(academy);  // Add directly using the DbSet method
-        context.SaveChangesToFile(dbSet);  // Save changes
-    }
+        String id = UUID.randomUUID().toString();
+        HashMap<String, Academy> academies = new HashMap<>(dbSet.getAcademies());
 
-    private void saveChanges(Map<Integer, Academy> academies) {
-        DbSet dbSet = context.getDatabaseFromFile();
+        academies.put(id, academy);
+
         dbSet.setAcademies(academies);
         context.SaveChangesToFile(dbSet);
+
+        return id;
     }
 
     @Override
     public void update(Academy academy) {
         DbSet dbSet = context.getDatabaseFromFile();
-        dbSet.addAcademy(academy);  // If academy already exists, overwrite it
+        HashMap<String, Academy> academies = new HashMap<String,Academy>(dbSet.getAcademies());
+
+        academies.put(academy.getId(), academy);
+
+        dbSet.setAcademies(academies);
         context.SaveChangesToFile(dbSet);
     }
 
     @Override
-    public void remove(int id) {
+    public void remove(String id) {
         DbSet dbSet = context.getDatabaseFromFile();
-        dbSet.getAcademies().remove(id);  // Remove by key in the Map
+        HashMap<String, Academy> academies = new HashMap<String,Academy>(dbSet.getAcademies());
+
+        academies.remove(id);
+
+        dbSet.setAcademies(academies);
         context.SaveChangesToFile(dbSet);
     }
 }

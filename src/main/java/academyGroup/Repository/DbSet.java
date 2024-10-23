@@ -4,6 +4,7 @@ import academyGroup.Entities.*;
 
 import java.io.Serializable;
 import java.util.*;
+//import javafx.util.Pair;
 
 /**
  * Represents the in-memory database set with primary and secondary indexes.
@@ -15,11 +16,11 @@ import java.util.*;
 public class DbSet implements Serializable { // Serializable allows Java to serialize the object, meaning it can convert the object into a format that can be saved (e.g., to a file)
     //database set
     // Clustered indexes (Primary IDs stored in Maps)
-    private Map<Integer, Academy> academies; // vs ArrayList<Academy> academies
-    private Map<Integer, Mentor> mentors; //  id(integer) is clustered index
-    private Map<Integer, Course> courses;
-    private Map<Integer, Group> groups;
-    private Map<Integer, MentorsToCourses> mentorsToCourses;
+    private Map<String, Academy> academies; // vs ArrayList<Academy> academies
+    private Map<String, Mentor> mentors; //  id(integer) is clustered index
+    private Map<String, Course> courses;
+    private Map<String, Group> groups;
+    private Map<String, MentorsToCourses> mentorsToCourses;
 
     // DbSet database = new DbSet
     // List<Mentor> mentors = databases.getMentors();
@@ -28,130 +29,168 @@ public class DbSet implements Serializable { // Serializable allows Java to seri
 
     // secondary indexes - non-clustered indexes (based on foreign keys)
     // academyId is non clustered index, and in set we store indices of groups
-    private Map<Integer, Set<Integer>> academyGroupAcademyIndex; // Academy to Groups
-    private Map<Integer, Set<Integer>> academyCourseAcademyIndex; // Academy to Courses
-    private Map<Integer, Set<Integer>> mentorCoursesMentorIndex; // Mentor to Courses
+    private Map<String, Set<String>> groupsAcademyIndex; // Academy to Groups
+    private Map<String, Set<String>> coursesAcademyIndex; // Academy to Courses
+    private Map<String, Set<String>> mentorsAcademyIndex; // Mentor to Courses
+
+    private Map<Pair<String, String>, Set<String>> courseGroupIndex;
+    private Map<Pair<String, String>, Set<String>> mentorGroupIndex;
 
     public DbSet() {
         academies = new HashMap<>();
+        groups = new HashMap<>();
         mentors = new HashMap<>();
         courses = new HashMap<>();
         mentorsToCourses = new HashMap<>();
 
-        academyGroupAcademyIndex = new TreeMap<>();
-        academyCourseAcademyIndex = new TreeMap<>();
-        mentorCoursesMentorIndex = new TreeMap<>();
+        groupsAcademyIndex = new TreeMap<>();
+        coursesAcademyIndex = new TreeMap<>();
+        mentorsAcademyIndex = new TreeMap<>();
+        courseGroupIndex = new TreeMap<>();
+        mentorGroupIndex = new TreeMap<>();
+
     }
 
     // To avoid losing ownership of private lists, we return a copy of the lists
     // *** Clustered Indexes ***
-    public Map<Integer, Academy> getAcademies() {
+// Academy
+    public Map<String,Academy> getAcademies() {
         return new HashMap<>(academies);
     }
-
-    public void setAcademies(Map<Integer,Academy> academies) {
+    public void setAcademies(Map<String,Academy> academies) {
         this.academies = academies;
     }
-    public void addAcademy(Academy newAcademy) {
-        academies.put(newAcademy.getId(),newAcademy);
-    }
-    public Academy getAcademy(int id) {
-        return academies.get(id); // O(1)
-    }
 
-//    public Academy getacademyLegacy(int id) { O(n)
-//        for (int i = 0; i < academies.size(); i++) {
-//            if (academies[i].getId() == id) {
-//                return academies[i];
-//            }
-//        }
-//        return null;
-//    }
-    public Map<Integer,Mentor> getMentors() { // ex of loose/week ownership
-    //  return mentors;
-    return new HashMap<>(mentors); // return a copy instead of the original list
-   }
-   public void addMentor(Mentor newMentor) {
-        mentors.put(newMentor.getId(), newMentor);
-   }
-    public Map<Integer,Course> getCourses() {
-        // return courses;
-        return new HashMap<>(courses);
-    }
-
-    public void addCourse(Course newCourse) {
-        courses.put(newCourse.getId(), newCourse);
-
-        // Update non-clustered index
-        Set<Integer> courseIds = academyCourseAcademyIndex.getOrDefault(newCourse.getAcademyId(), new HashSet<>());
-        courseIds.add(newCourse.getId());
-        academyCourseAcademyIndex.put(newCourse.getAcademyId(), courseIds);
-    }
-    public Map<Integer,Group> getGroups() {
-        //return groups;
+    // Group
+    public Map<String,Group> getGroups() {
         return new HashMap<>(groups);
     }
-
-    public void addGroup(Group newGroup) {
-        groups.put(newGroup.getId(),newGroup);
-
-        // Update non-clustered index
-        Set<Integer> academyGroupIds =
-                academyGroupAcademyIndex.getOrDefault(newGroup.getAcademyId(), new HashSet<>());
-        academyGroupIds.add(newGroup.getId());
-        academyGroupAcademyIndex.put(newGroup.getAcademyId(),academyGroupIds);
+    public void setGroups(Map<String,Group> groups) {
+        this.groups = groups;
     }
-    public Map<Integer,MentorsToCourses> getMentorsToCourses() {
-        // return mentorsToCourses;
+    public Set<String> getGroupAcademyIndex(String academyId) {
+        if (this.groupsAcademyIndex.containsKey(academyId)) {
+            return new HashSet<>(this.groupsAcademyIndex.get(academyId));
+        }
+
+        return new HashSet<>();
+    }
+
+    public void setGroupAcademyIndex(String academyId, Set<String> groups) {
+        this.groupsAcademyIndex.put(academyId, groups);
+    }
+    public List<Group> getGroupsByAcademyId(String academyId) {
+        List<Group> result = new ArrayList<>();
+        Set<String> indices = groupsAcademyIndex.get(academyId);
+        if (indices != null) {
+            for (String index : indices) {
+                result.add(groups.get(index));
+            }
+        }
+        return result;
+    }
+
+    // Course
+    public Map<String,Course> getCourses() {
+        return new HashMap<>(courses);
+    }
+    public void setCourses(Map<String,Course> courses) {
+        this.courses = courses;
+    }
+    public Set<String> getCoursesAcademyIndex(String academyId) {
+        if (this.coursesAcademyIndex.containsKey(academyId)) {
+            return new HashSet<>(this.coursesAcademyIndex.get(academyId));
+        }
+
+        return new HashSet<>();
+    }
+    public void setCoursesAcademyIndex(String academyId, Set<String> academyGroups) {
+        this.coursesAcademyIndex.put(academyId, academyGroups);
+    }
+    public List<Course> getCoursesByAcademyId(String academyId) {
+        List<Course> result = new ArrayList<>();
+        Set<String> indices = coursesAcademyIndex.get(academyId);
+        if (indices != null) {
+            for (String index : indices) {
+                result.add(courses.get(index));
+            }
+        }
+        return result;
+    }
+
+    // Mentor
+    public Map<String,Mentor> getMentors() {
+        return new HashMap<>(mentors);
+    }
+    public void setMentors(Map<String,Mentor> mentors) {
+        this.mentors = mentors;
+    }
+    public Set<String> getMentorsAcademyIndex(String academyId) {
+        if (this.mentorsAcademyIndex.containsKey(academyId)) {
+            return new HashSet<>(this.mentorsAcademyIndex.get(academyId));
+        }
+
+        return new HashSet<>();
+    }
+    public void setMentorsAcademyIndex(String academyId, Set<String> academyGroups) {
+        this.mentorsAcademyIndex.put(academyId, academyGroups);
+    }
+    public List<Mentor> getMentorsByAcademyId(String academyId) {
+        List<Mentor> result = new ArrayList<>();
+        Set<String> indices = mentorsAcademyIndex.get(academyId);
+        if (indices != null) {
+            for (String index : indices) {
+                result.add(mentors.get(index));
+            }
+        }
+        return result;
+    }
+
+    // MentorsToCourses
+    public Map<String,MentorsToCourses> getMentorsToCourses() {
         return new HashMap<>(mentorsToCourses);
     }
-    public void addMentorsToCourses(MentorsToCourses newMenToCour) {
-        mentorsToCourses.put(newMenToCour.getId(), newMenToCour);
-
-        // Update non-clustered index
-        Set<Integer> courseIds = mentorCoursesMentorIndex.getOrDefault(newMenToCour.getMentorId(), new HashSet<>());
-        courseIds.add(newMenToCour.getCourseId());
-        mentorCoursesMentorIndex.put(newMenToCour.getMentorId(), courseIds);
+    public void setMentorsToCourses(Map<String,MentorsToCourses> mentorsToCourses) {
+        this.mentorsToCourses = mentorsToCourses;
+    }
+    public Set<String> getMentorsToCoursesCourseGroupIndex(String courseId, String groupId) {
+        return new HashSet<>(this.courseGroupIndex.get(new Pair<>(courseId,groupId)));
+    }
+    public void setMentorsToCoursesCourseGroupIndex(String courseId, String groupId, Set<String> mentorsToCourses) {
+        this.courseGroupIndex.put(new Pair<>(courseId,groupId), mentorsToCourses);
+    }
+    public Set<String> getMentorsToCoursesMentorGroupIndex(String mentorId, String groupId) {
+        return new HashSet<>(this.mentorGroupIndex.get(new Pair<>(mentorId, groupId)));
+    }
+    public void setMentorsToCoursesMentorGroupIndex(String mentorId, String groupId, Set<String> mentorsToCourses) {
+        this.mentorGroupIndex.put(new Pair<>(mentorId, groupId), mentorsToCourses);
     }
 
-    // *** Non-clustered Index Methods ***
-//   SELECT groupName FROM Group WHERE AcademyId=1?
-    public List<Group> getGroupsByAcademyId(int academyId) {
-        List<Group> groups = new ArrayList<>();
-        Set<Integer> academyGroupsIds = academyGroupAcademyIndex.get(academyId);
-        if (academyGroupsIds != null) {
-            for (int academyGroupId: academyGroupsIds) {
-                groups.add(groups.get(academyGroupId));
-            }
-        }
-        return groups;
-    }
-    public List<Course> getCoursesByAcademyId(int academyId) {
-        List<Course> courses = new ArrayList<>();
-        Set<Integer> courseIds = academyCourseAcademyIndex.get(academyId);
-        if (courseIds != null) {
-            for (int courseId : courseIds) {
-                courses.add(courses.get(courseId));
-            }
-        }
-        return courses;
-    }
-
-    public List<Course> getCoursesByMentorId(int mentorId) {
-        List<Course> courses = new ArrayList<>();
-        Set<Integer> courseIds = mentorCoursesMentorIndex.get(mentorId);
-        if (courseIds != null) {
-            for (int courseId : courseIds) {
-                courses.add(courses.get(courseId));
-            }
-        }
-        return courses;
-    }
-    public List<Mentor> getMentorsByAcademyId(int academyId) {
+    // give me all mentors names in CS course and in group 2024
+    // result: Nurbek, Scott
+    // process: courseGroupIndex contains pair of courseId, groupId as a key, a value it is set of mentorsToCourses(id, courseId, groupId, mentorId)
+    public List<Mentor> getAllMentorsByCourseIdAndGroupId(String courseId, String groupId) {
         List<Mentor> result = new ArrayList<>();
-        for (Mentor mentor : mentors.values()) {
-            if (mentor.getAcademyId() == academyId) {
-                result.add(mentor);
+        Set<String> indices = courseGroupIndex.get(new Pair<>(courseId, groupId));
+        if (indices != null) {
+            for (String index : indices) {
+                MentorsToCourses mentorsToCourses = this.mentorsToCourses.get(index);
+                result.add(mentors.get(mentorsToCourses.getMentorId()));
+            }
+        }
+        return result;
+    }
+
+    // give me all courses where this mentor teaches and group id is {groupId} , Azret + group2024
+    // result: Algorithms, Math
+    // process: mentorGroupIndex contains pair of mentorId, groupId as a key, a value it is set of mentorsToCourses(id, courseId, groupId, mentorId)
+    public List<Course> getAllCoursesByMentorIdAndGroupId(String mentorId, String groupId) {
+        List<Course> result = new ArrayList<>();
+        Set<String> indices = mentorGroupIndex.get(new Pair<>(mentorId, groupId));
+        if (indices != null) {
+            for (String index : indices) {
+                MentorsToCourses mentorsToCourses = this.mentorsToCourses.get(index);
+                result.add(courses.get(mentorsToCourses.getCourseId()));
             }
         }
         return result;
@@ -159,4 +198,5 @@ public class DbSet implements Serializable { // Serializable allows Java to seri
 }
 
 
-
+    // *** Non-clustered Index Methods ***
+//   SELECT groupName FROM Group WHERE AcademyId=1?

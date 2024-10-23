@@ -1,52 +1,87 @@
 package academyGroup.Repository;
 
 import academyGroup.Entities.Mentor;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Repository for managing CRUD operations for Mentor entities.
  */
 public class MentorRepository implements IRepository<Mentor> {
-    private DbContext context;
+    DbContext context;
     public MentorRepository(DbContext context) {
         this.context = context;
     }
-
-
     @Override
-    public Map<Integer, Mentor> getAll() {
+    public Map<String,Mentor> getAll() {
         DbSet dbSet = context.getDatabaseFromFile();
-        return dbSet.getMentors();
+        return new HashMap<String,Mentor>(dbSet.getMentors());
     }
 
     @Override
-    public Mentor getById(int id) {
-        return getAll().get(id);  // O(1) lookup by Map key
+    public Mentor getById(String id) {
+        Map<String,Mentor> mentors = getAll();
+        if (mentors.containsKey(id)) {
+            return mentors.get(id);
+        }
+
+        return null;
     }
 
     @Override
-    public void add(Mentor mentor) {
+    public String add(Mentor mentor) {
         DbSet dbSet = context.getDatabaseFromFile();
-        dbSet.addMentor(mentor);  // Add the group using the DbSet method
+
+        // add to Mentor table
+        String id = UUID.randomUUID().toString();
+        mentor.setId(id); // generate new UUID random string and set it for Id of an entity
+        Map<String,Mentor> mentors = new HashMap<String,Mentor>(dbSet.getMentors());
+        mentors.put(mentor.getId(), mentor);
+        dbSet.setMentors(mentors);
+
+        // update academyId index
+        Set<String> indices = dbSet.getMentorsAcademyIndex(mentor.getAcademyId());
+        indices.add(id);
+        dbSet.setMentorsAcademyIndex(mentor.getAcademyId(), indices);
+
         context.SaveChangesToFile(dbSet);
+
+        return id;
     }
 
     @Override
     public void update(Mentor mentor) {
         DbSet dbSet = context.getDatabaseFromFile();
-        dbSet.addMentor(mentor);  // Replace if exists
+
+        // Update Mentor table
+        Map<String,Mentor> mentors = new HashMap<String,Mentor>(dbSet.getMentors());
+        mentors.put(mentor.getId(), mentor);
+        dbSet.setMentors(mentors);
+
+        // update academyId index
+        Set<String> indices = dbSet.getMentorsAcademyIndex(mentor.getAcademyId());
+        indices.add(mentor.getId());
+        dbSet.setMentorsAcademyIndex(mentor.getAcademyId(), indices);
+
         context.SaveChangesToFile(dbSet);
     }
 
     @Override
-    public void remove(int id) {
+    public void remove(String id) {
         DbSet dbSet = context.getDatabaseFromFile();
-        dbSet.getMentors().remove(id);  // Remove by key in the Map
+
+        // Remove from Mentor table
+        Map<String,Mentor> mentors = new HashMap<String,Mentor>(dbSet.getMentors());
+        String academyId = mentors.get(id).getAcademyId();
+        mentors.remove(id);
+        dbSet.setMentors(mentors);
+
+        // remove from index
+        Set<String> indices = dbSet.getMentorsAcademyIndex(academyId);
+        indices.remove(id);
+        dbSet.setMentorsAcademyIndex(academyId, indices);
+
         context.SaveChangesToFile(dbSet);
     }
-    public List<Mentor> getMentorsByAcademyId(int academyId) {
-        DbSet dbSet = context.getDatabaseFromFile();
-        return dbSet.getMentorsByAcademyId(academyId);
-    }
 }
+

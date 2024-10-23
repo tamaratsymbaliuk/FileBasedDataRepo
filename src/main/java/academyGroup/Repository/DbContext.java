@@ -23,7 +23,7 @@ public class DbContext {
 
     public DbContext(String filename) {
         FILENAME = filename;
-        createFileIfDoesExist();
+        createFileIfNew();
         containsNewChanges = true;
     }
 
@@ -46,7 +46,7 @@ public class DbContext {
                 currentDbSet = (DbSet) objectInputStream.readObject();
             } catch (EOFException e) {
 
-            } catch (Exception e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
@@ -69,17 +69,18 @@ public class DbContext {
         }
     }
 
-    private void createFileIfDoesExist() {
+    private void createFileIfNew() {
         File file = new File(FILENAME);
         try {
-            if (file.exists()) {
-                System.out.println(FILENAME + " exists");
-            } else {
-                file.createNewFile();
+            if (!file.exists()) {
+                if (file.createNewFile()) {
+                    System.out.println("File created: " + file.getAbsolutePath());
+                } else {
+                    System.out.println("Failed to create file: " + file.getAbsolutePath());
+                }
             }
-
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error creating file: " + e.getMessage());
         }
     }
 }

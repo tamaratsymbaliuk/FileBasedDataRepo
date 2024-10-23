@@ -1,45 +1,81 @@
 package academyGroup;
 
 import academyGroup.Entities.Academy;
+import academyGroup.Entities.Course;
 import academyGroup.Entities.Group;
 import academyGroup.Entities.Mentor;
 import academyGroup.Repository.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        DbContext context = new DbContext("db");
-        IRepository<Academy> academyRepository = new AcademyRepository(context);
-        IRepository<Group> groupRepo = new GroupRepository(context);
-        IRepository<Mentor> mentorRepo = new MentorRepository(context);
+        String fileName = "db.file";
+        //DbBackup dbBackup = new DbBackup(fileName);
+        //WriteAheadLog wal = new WriteAheadLog("wal.log");
+        //dbBackup.RunEvery(30,0);
+        FillData(fileName);
+        PrintData(fileName);
+        System.in.read();
+    }
+    private static void FillData(String fileName) {
+        DbContext database = new DbContext(fileName);
+        AcademyRepository academyRepository = new AcademyRepository(database);
+        GroupRepository academyGroupRepository = new GroupRepository(database);
+        CourseRepository courseRepository = new CourseRepository(database);
+        MentorRepository mentorRepository = new MentorRepository(database);
 
-        //  academyRepository.add(new Academy(0, "GrowthHungry Academy"));
-//        for (Academy academy : academyRepository.getAll()) {
-//            System.out.println(academy.getId() + " " + academy.getDescription());
-//        }
+        Academy academy = new Academy("GrowthHungry Academy - education for everyone");
+        String academyId = academyRepository.add(academy);
+        System.out.println(academyId);
 
-        // Add a new Academy
-        Academy academy1 = new Academy(0, "GrowthHungry Academy");
-        Academy academy2 = new Academy(1, "Innovators Academy");
-        academyRepository.add(academy1);
-        academyRepository.add(academy2);
+        Group group2024 = new Group("group 2024", academyId);
+        String group2024Id = academyGroupRepository.add(group2024);
+        Group group2025 = new Group("group 2025", academyId);
+        String group2025Id = academyGroupRepository.add(group2025);
 
-        // Add new Groups to each Academy
-        Group group1 = new Group(0, "Group 2023", academy1.getId());
-        Group group2 = new Group(1, "Group 2024", academy1.getId());
-        Group group3 = new Group(2, "Group 2025", academy2.getId());
-        groupRepo.add(group1);
-        groupRepo.add(group2);
-        groupRepo.add(group3);
+        Course csCourse = new Course("Computer Science", academyId, 24.00);
+        String courseId = courseRepository.add(csCourse);
+        Course algoCourse = new Course("Algorithms", academyId, 24.00);
+        String algoCourseId = courseRepository.add(algoCourse);
 
-        // Add new Mentors for each Academy
-        Mentor mentor1 = new Mentor(0, "John Doe", academy1.getId());
-        Mentor mentor2 = new Mentor(1, "Jane Smith", academy2.getId());
-        mentorRepo.add(mentor1);
-        mentorRepo.add(mentor2);
-       // System.out.println("Group ID: " + group.getId() + ", Name: " + group.getName() + ", Academy ID: " + group.getAcademyId());
+        Mentor nurbekMentor = new Mentor("Nurbek Akparaliev", academyId);
+        String nurbekMentorId = mentorRepository.add(nurbekMentor);
+        Mentor dastanMentor = new Mentor("Dastan Telnov", academyId);
+        String dastanMentorId = mentorRepository.add(dastanMentor);
+        Mentor scottMentor = new Mentor("Scott Miles", academyId);
+        String scottMentorId = mentorRepository.add(scottMentor);
+        //segmentMentorA-D {nurbekMentor, dastanMentor}
+        //segmentMentorF-Z {scottMentor}
+        // B-Tree
+        //                          root
+        //  segmentMentorA-D[Updated]   segmentMentorF-Z
+        // sMA, sMB[Updated], smC
+    }
 
+    private static void PrintData(String fileName) {
+        DbContext database = new DbContext(fileName);
+        AcademyRepository academyRepository = new AcademyRepository(database);
+        GroupRepository academyGroupRepository = new GroupRepository(database);
+        CourseRepository courseRepository = new CourseRepository(database);
+        MentorRepository mentorRepository = new MentorRepository(database);
 
-        // Test removing an Academy (and handle its related entities if needed)
+        System.out.println("All Academies information: ");
+        for (Academy academy : academyRepository.getAll().values()) {
+            System.out.println(academy.getDescription());
+        }
 
+        System.out.println("All groups names: ");
+        for (Group academyGroup : academyGroupRepository.getAll().values()) {
+            System.out.println(academyGroup.getName());
+        }
+
+        System.out.println("All courses: ");
+        for (Course course : courseRepository.getAll().values()) {
+            System.out.println(course.getName());
+        }
+
+        System.out.println("All mentors: ");
+        for (Mentor mentor : mentorRepository.getAll().values()) {
+            System.out.println(mentor.getName());
+        }
     }
 }

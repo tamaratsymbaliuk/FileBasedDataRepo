@@ -7,21 +7,20 @@ import java.io.Serializable;
  * It includes the mentor's ID, name, and the associated academy ID.
  */
 public class Mentor implements Serializable {
-    private int id;
+    private String id;
     private String name;
-    private int academyId;
+    private String academyId;
 
-    public Mentor(int id, String name, int academyId) {
-        this.id = id;
+    public Mentor(String name, String academyId) {
         this.name = name;
         this.academyId = academyId;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -33,11 +32,11 @@ public class Mentor implements Serializable {
         this.name = name;
     }
 
-    public int getAcademyId() {
+    public String getAcademyId() {
         return academyId;
     }
 
-    public void setAcademyId(int academyId) {
+    public void setAcademyId(String academyId) {
         this.academyId = academyId;
     }
 }

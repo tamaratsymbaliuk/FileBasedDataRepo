@@ -8,40 +8,40 @@ import java.io.Serializable;
  */
 public class MentorsToCourses implements Serializable {
     // many-to-many relationship
-    private int id;
-    private int courseId;
-    private int mentorId;
-    private int groupId;
+    private String id;
+    private String courseId;
+    private String mentorId;
+    private String groupId;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public int getCourseId() {
+    public String getCourseId() {
         return courseId;
     }
 
-    public void setCourseId(int courseId) {
+    public void setCourseId(String courseId) {
         this.courseId = courseId;
     }
 
-    public int getMentorId() {
+    public String getMentorId() {
         return mentorId;
     }
 
-    public void setMentorId(int mentorId) {
+    public void setMentorId(String mentorId) {
         this.mentorId = mentorId;
     }
 
-    public int getGroupId() {
+    public String getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 }

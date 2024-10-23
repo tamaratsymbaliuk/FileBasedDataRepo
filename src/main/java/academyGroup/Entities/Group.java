@@ -7,19 +7,18 @@ import java.io.Serializable;
  * It includes the group's ID, name, and associated academy ID.
  */
 public class Group implements Serializable {
-    private int id;
+    private String id;
     private String name;
-    private int academyId;
+    private String academyId;
 
-    public Group(int id, String name, int academyId) {
-        this.id = id;
+    public Group(String name, String academyId) {
         this.name = name;
         this.academyId = academyId;
     }
-    public int getId() {
+    public String getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
     public String getName() {
@@ -28,10 +27,10 @@ public class Group implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    public int getAcademyId() {
+    public String getAcademyId() {
         return academyId;
     }
-    public void setAcademyId(int academyId) {
+    public void setAcademyId(String academyId) {
         this.academyId = academyId;
     }
 }

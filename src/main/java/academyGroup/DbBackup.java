@@ -1,10 +1,13 @@
 package academyGroup;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,7 +25,7 @@ public class DbBackup {
             public void run() {
                 System.out.println("Running backup every " + minutes + " minutes, " + seconds + " seconds");
                 createNewVersion();
-                removeOldVersion();
+                removeOldVersion(5);
             }
         }, 0,milliseconds); // Run immediately and then every {minutes} minutes, {seconds} seconds
     }
@@ -45,8 +48,26 @@ public class DbBackup {
         }
     }
 
-    private void removeOldVersion() {
-        // home task
+    /**
+     * Removes old backup versions, keeping only the most recent `retainCount` versions.
+     */
+    private void removeOldVersion(int retainCount) {
+        File directory = new File("."); // current directory
+        File[] backupFiles = directory.listFiles((dir, name) -> name.startsWith(FILENAME) && name.contains("_"));
+
+        if (backupFiles != null && backupFiles.length > retainCount) {
+            // Sort files by last modified date in descending order (newest first)
+            Arrays.sort(backupFiles, Comparator.comparingLong(File::lastModified).reversed());
+
+            // Remove older files beyond retainCount
+            for (int i = retainCount; i < backupFiles.length; i++) {
+                if (backupFiles[i].delete()) {
+                    System.out.println("Deleted old backup: " + backupFiles[i].getName());
+                } else {
+                    System.out.println("Failed to delete old backup: " + backupFiles[i].getName());
+                }
+            }
+        }
     }
     private String createNewFileName() {
         LocalDateTime now = LocalDateTime.now();

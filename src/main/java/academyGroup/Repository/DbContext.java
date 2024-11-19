@@ -68,19 +68,4 @@ public class DbContext {
             e.printStackTrace();
         }
     }
-
-    private void createFileIfNew() {
-        File file = new File(FILENAME);
-        try {
-            if (!file.exists()) {
-                if (file.createNewFile()) {
-                    System.out.println("File created: " + file.getAbsolutePath());
-                } else {
-                    System.out.println("Failed to create file: " + file.getAbsolutePath());
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error creating file: " + e.getMessage());
-        }
-    }
 }

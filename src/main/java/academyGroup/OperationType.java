@@ -1,7 +1,7 @@
 package academyGroup;
 
 public enum OperationType {
-    INSERT,
+    ADD,
     UPDATE,
-    DELETE
+    REMOVE
 }

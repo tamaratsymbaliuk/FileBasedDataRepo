@@ -23,7 +23,7 @@ public class DbContext {
 
     public DbContext(String filename) {
         FILENAME = filename;
-        createFileIfNew();
+        FileUtil.createFileIfNew(FILENAME);
         containsNewChanges = true;
     }
 
@@ -51,7 +51,6 @@ public class DbContext {
             }
 
             containsNewChanges = false;
-            return currentDbSet;
         }
         return currentDbSet;
     }

@@ -1,8 +1,9 @@
 package academyGroup;
 
+import academyGroup.Repository.FileUtil;
+
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.Gson;
 
 public class WriteAheadLog<T> {
     // Write-ahead log
@@ -10,37 +11,37 @@ public class WriteAheadLog<T> {
 
     public WriteAheadLog(String fileName) {
         this.FILENAME = fileName;
+        FileUtil.createFileIfNew(FILENAME);
     }
 
-    public void logOperation(OperationType type, String entityName, T entity) {
-        WALItem<T> walItem = new WALItem<>(type, entityName, entity);
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(FILENAME, true))) {
-            outputStream.writeObject(walItem);
-            System.out.println("Operation logged: " + walItem);
+    public void logAdd(String id, String className, T entity) {
+        WriteAheadLogEntry<T> entry = new WriteAheadLogEntry<>(OperationType.ADD, className, entity, id);
+        Gson gson = new Gson();
+        String entryJson = gson.toJson(entry);
+        saveToFile(entryJson);
+    }
+
+    public void logUpdate(String className, T entity) {
+        WriteAheadLogEntry<T> entry = new WriteAheadLogEntry<>(OperationType.UPDATE, className, entity);
+        Gson gson = new Gson();
+        String entryJson = gson.toJson(entry);
+        saveToFile(entryJson);
+    }
+
+    public void logRemove(String className, String id) {
+        WriteAheadLogEntry<T> entry = new WriteAheadLogEntry<>(OperationType.REMOVE, className, id);
+        Gson gson = new Gson();
+        String entryJson = gson.toJson(entry);
+        saveToFile(entryJson);
+    }
+
+    private void saveToFile(String entryJson){
+        try (FileWriter writer = new FileWriter(FILENAME, true)) {
+            writer.write(entryJson);
+            writer.write("\n");
         } catch (IOException e) {
-            System.err.println("Failed to log operation: " + e.getMessage());
-
+            e.printStackTrace();
         }
-    }
-
-    public List<WALItem<T>> getAll() {
-        List<WALItem<T>> walItems = new ArrayList<>();
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(FILENAME))) {
-            while (true) {
-                try {
-                    WALItem<T> walItem = (WALItem<T>) inputStream.readObject();
-                    walItems.add(walItem);
-                } catch (EOFException e) {
-                    break;
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to read log: " + e.getMessage());
-
-            }
-           return walItems;
-        }
-
     }
 }
 
